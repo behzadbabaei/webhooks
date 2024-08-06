@@ -23,8 +23,10 @@ return [
         });
     },
     'down' => function (Builder $schema) {
-        $schema->table('webhooks', function (Blueprint $table) {
-            $table->dropColumn('extra_text');
-        });
+        if ($schema->hasColumn('webhooks', 'extra_text')) {
+            $schema->table('webhooks', function (Blueprint $table) {
+                $table->dropColumn('extra_text');
+            });
+        }
     },
 ];

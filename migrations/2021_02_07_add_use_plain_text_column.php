@@ -14,13 +14,18 @@ use Illuminate\Database\Schema\Builder;
 
 return [
     'up' => function (Builder $schema) {
+        if ($schema->hasColumn('webhooks', 'use_plain_text')) {
+            return;
+        }
         $schema->table('webhooks', function (Blueprint $table) {
             $table->boolean('use_plain_text');
         });
     },
     'down' => function (Builder $schema) {
-        $schema->table('webhooks', function (Blueprint $table) {
-            $table->dropColumn('use_plain_text');
-        });
+        if ($schema->hasColumn('webhooks', 'use_plain_text')) {
+            $schema->table('webhooks', function (Blueprint $table) {
+                $table->dropColumn('use_plain_text');
+            });
+        }
     },
 ];

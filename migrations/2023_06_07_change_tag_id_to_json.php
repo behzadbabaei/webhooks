@@ -14,13 +14,17 @@ use Illuminate\Database\Schema\Builder;
 
 return [
     'up' => function (Builder $schema) {
-        $schema->table('webhooks', function (Blueprint $table) {
-            $table->json('tag_id')->change();
-        });
+        if ($schema->hasColumn('webhooks', 'tag_id')) {
+            $schema->table('webhooks', function (Blueprint $table) {
+                $table->json('tag_id')->change();
+            });
+        }
     },
     'down' => function (Builder $schema) {
-        $schema->table('webhooks', function (Blueprint $table) {
-            $table->unsignedInteger('tag_id')->change();
-        });
+        if ($schema->hasColumn('webhooks', 'tag_id')) {
+            $schema->table('webhooks', function (Blueprint $table) {
+                $table->unsignedInteger('tag_id')->change();
+            });
+        }
     },
 ];

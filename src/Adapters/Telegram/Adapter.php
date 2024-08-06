@@ -36,19 +36,43 @@ class Adapter extends \FoF\Webhooks\Adapters\Adapter
      */
     public function send(string $url, Response $response)
     {
-        $title = $this->settings->get('forum_title');
+        $title = $response->title;
+        $description = $response->description;
+        $forumUrl = $response->url;
+        $authorId = $response->author->id;
+        $authorUsername = $response->author->username;
+        $discussionTitle = $response->event->post->discussion->title;
+
+        // Constructing the message
+        $message = "Message from: \"{$authorUsername}\"" . PHP_EOL;
+        $message .= "In: \"{$discussionTitle}\"" . PHP_EOL;
+        $message .= "Text: \"{$description}\"" . PHP_EOL;
+
+        // URL Button
+        $keyboard = [
+            'inline_keyboard' => [
+                [
+                    [
+                        'text' => 'Go to Forum',
+                        'url' => $forumUrl,
+                    ],
+                ],
+            ],
+        ];
+
+        // Convert keyboard array to JSON
+        $replyMarkup = json_encode($keyboard);
 
         $res = $this->request($url, [
-            'username'    => $title,
-            'avatar_url'  => $this->getAvatarUrl(),
-            'text'        => $response->getExtraText(),
-            'attachments' => [
-                $this->toArray($response),
-            ],
-        ]);
+            'text' => $message,
+            'reply_markup' => $replyMarkup,
+        ]);;
 
-        if ($res->getStatusCode() == 302) {
-            throw new TelegramException($res, $url);
+        error_log("Message to Telegram: " . $message);
+        error_log("Telegram API Response: " . json_encode($res->getBody()->getContents()));
+
+        if ($res->getStatusCode() != 200) {
+            throw new \Exception("Failed to send message to Telegram. Status code: {$res->getStatusCode()}");
         }
     }
 
